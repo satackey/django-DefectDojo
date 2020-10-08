@@ -35,7 +35,7 @@ RUN LATEST_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_
     rm /tmp/chromedriver.zip && \
     chmod 777 /usr/local/bin/chromedriver;
 
-RUN pip install --no-cache-dir selenium requests
+RUN pip install --no-cache-dir selenium requests  --use-feature=2020-resolver
 
 COPY tests/ ./tests/
 COPY docker/wait-for-it.sh \

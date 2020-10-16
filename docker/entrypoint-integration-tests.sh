@@ -1,5 +1,7 @@
 #!/bin/bash
 
+fail('testing valentijn')
+
 echo "Waiting 60s for services to start"
 # Wait for services to become available
 sleep 60

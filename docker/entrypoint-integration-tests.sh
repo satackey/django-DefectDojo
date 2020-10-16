@@ -1,5 +1,5 @@
 #!/bin/bash
-
+echo "testing valentijn echo"
 fail('testing valentijn')
 
 echo "Waiting 60s for services to start"

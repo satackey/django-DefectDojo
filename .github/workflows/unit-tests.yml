@@ -1,4 +1,4 @@
-name: Integration tests
+name: Unit tests
 # pull requests: 
 #      run on pull_request_target instead of just pull_request as we need write access to update the status check
 # dev, master:
@@ -26,8 +26,8 @@ jobs:
           ref: refs/pull/${{ github.event.pull_request.number }}/merge
           # repository: ${{github.event.pull_request.head.repo.full_name}}
       
-      - name: Set integration-test mode
-        run: docker/setEnv.sh integration_tests
+      - name: Set unit-test mode
+        run: docker/setEnv.sh unit_tests_cicd
       
       # Pull the latest image to build, and avoid caching pull-only images.
       # (docker pull is faster than caching in most cases.)
@@ -49,12 +49,8 @@ jobs:
       - name: Initialize
         run: docker-compose up --exit-code-from initializer initializer
 
-      - name: Start Dojo
-        # implicity starts uwsgi and rabbitmq
-        run: docker-compose up -d nginx celerybeat celeryworker
-
-      - name: Integration tests
-        run: docker-compose up --exit-code-from integrationtest integrationtest
+      - name: Unit tests
+        run: docker-compose up --exit-code-from uwsgi uwsgi
 
       - name: Logs
         if: failure()

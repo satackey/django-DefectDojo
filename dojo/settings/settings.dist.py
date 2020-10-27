@@ -6,6 +6,7 @@ from celery.schedules import crontab
 import environ
 root = environ.Path(__file__) - 3  # Three folders back
 
+# reference: https://pypi.org/project/django-environ/
 env = environ.Env(
     # Set casting and default values
     DD_SITE_URL=(str, 'http://localhost:8080'),
@@ -58,6 +59,7 @@ env = environ.Env(
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
+    DD_FOOTER_VERSION=(str, ''),
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
@@ -138,7 +140,10 @@ env = environ.Env(
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
-    DD_JIRA_SSL_VERIFY=(bool, True)
+    DD_JIRA_SSL_VERIFY=(bool, True),
+
+    # if you want to keep logging to the console but in json format, change this here to 'json_console'
+    DD_LOGGING_FORMAT=(str, 'console')
 )
 
 
@@ -481,6 +486,9 @@ PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
 
+# Used to configure a custom version in the footer of the base.html template.
+FOOTER_VERSION = env('DD_FOOTER_VERSION')
+
 # Django-tagging settings
 FORCE_LOWERCASE_TAGS = env('DD_FORCE_LOWERCASE_TAGS')
 MAX_TAG_LENGTH = env('DD_MAX_TAG_LENGTH')
@@ -801,15 +809,12 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 
 JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 
-
 # ------------------------------------------------------------------------------
 # LOGGING
 # ------------------------------------------------------------------------------
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+LOGGING_FORMAT = env('DD_LOGGING_FORMAT')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -843,7 +848,6 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
         'json_console': {
-            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'json'
         },
@@ -854,29 +858,37 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'django.security': {
+            'handlers': [r'%s' % LOGGING_FORMAT],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': [r'%s' % LOGGING_FORMAT],
+            'level': 'INFO',
+            'propagate': False,
+            # does not seem to work?
+            # 'worker_hijack_root_logger': False,
+        },
         'dojo': {
-            # specify 'json_console' to get jsonify logs (or both at once)
-            # 'handlers': ['json_console'],
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_FORMAT],
             'level': 'INFO',
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
-            # specify 'json_console' to get jsonify logs (or both at once)
-            # 'handlers': ['json_console'],
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_FORMAT],
             'level': 'INFO',
             'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_FORMAT],
             'level': 'WARNING',
             'propagate': False,
         },
         'titlecase': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': ['console'],
+            'handlers': [r'%s' % LOGGING_FORMAT],
             'level': 'WARNING',
             'propagate': False,
         },

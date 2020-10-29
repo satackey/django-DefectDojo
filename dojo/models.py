@@ -656,6 +656,7 @@ class Product(models.Model):
     external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
+    valentijn = models.CharField(max_length=19, choices=ORIGIN_CHOICES, blank=True, null=True)
 
     # used for prefetching tags because django-tagging doesn't support that out of the box
     tagged_items = GenericRelation(TaggedItem)

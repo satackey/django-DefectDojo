@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
+from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -153,8 +154,10 @@ def alerts_json(request, limit=None):
 
 
 def alertcount(request):
-    count = Alerts.objects.filter(user_id=request.user).count()
-    return JsonResponse({'count': count})
+    if not settings.DISABLE_ALERT_COUNTER:
+        count = Alerts.objects.filter(user_id=request.user).count()
+        return JsonResponse({'count': count})
+    return JsonResponse({'count': 0})
 
 
 def view_profile(request):
@@ -310,6 +313,12 @@ def edit_user(request, uid):
 
         if form.is_valid() and contact_form.is_valid():
             form.save()
+            for init_auth_prods in authed_products:
+                init_auth_prods.authorized_users.remove(user)
+                init_auth_prods.save()
+            for init_auth_prod_types in authed_product_types:
+                init_auth_prod_types.authorized_users.remove(user)
+                init_auth_prod_types.save()
             if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)

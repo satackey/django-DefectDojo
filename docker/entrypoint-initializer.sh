@@ -1,4 +1,32 @@
 #!/bin/sh
+
+# Allow for bind-mount setting.py overrides
+FILE=/app/docker/extra_settings/settings.dist.py
+if test -f "$FILE"; then
+    echo "============================================================"
+    echo "     Overriding DefectDojo's settings.dist.py with $FILE."
+    echo "============================================================"
+    cp "$FILE" /app/dojo/settings/settings.dist.py
+fi
+
+# Allow for bind-mount setting.py overrides
+FILE=/app/docker/extra_settings/settings.py
+if test -f "$FILE"; then
+    echo "============================================================"
+    echo "     Overriding DefectDojo's settings.py with $FILE."
+    echo "============================================================"
+    cp "$FILE" /app/dojo/settings/settings.py
+fi
+
+# Allow for bind-mount setting.py overrides
+FILE=/app/docker/extra_settings/local_settings.py
+if test -f "$FILE"; then
+    echo "============================================================"
+    echo "     Overriding DefectDojo's local_settings.py with $FILE."
+    echo "============================================================"
+    cp "$FILE" /app/dojo/settings/local_settings.py
+fi
+
 umask 0002
 
 if [ "${DD_INITIALIZE}" = false ]
@@ -72,6 +100,13 @@ EOD
   python3 manage.py loaddata regulation
   python3 manage.py import_surveys
   python3 manage.py loaddata initial_surveys
+
+  # If there is extra fixtures, load them
+  for i in $(ls dojo/fixtures/extra_*.json | sort -n 2>/dev/null) ; do
+    echo "Loading $i"
+    python3 manage.py loaddata ${i%.*}
+  done
+
   python3 manage.py installwatson
   exec python3 manage.py buildwatson
 fi

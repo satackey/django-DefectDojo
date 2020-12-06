@@ -5,12 +5,12 @@ name: Flake8
 #      run on every push, which is when something gets merged also
 on: 
   pull_request_target:
-  push:
-    branches:
-      - master
-      - dev
-      - release/**
-      - hotfix/**
+  # push:
+  #   branches:
+  #     - master
+  #     - dev
+  #     - release/**
+  #     - hotfix/**
   
 jobs:
   flake8-your-pr:

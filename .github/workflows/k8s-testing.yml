@@ -1,12 +1,12 @@
 name: k8s deployment
 on:
   pull_request_target:
-  push:
-    branches:
-      - master
-      - dev
-      - release/**
-      - hotfix/**
+  # push:
+  #   branches:
+  #     - master
+  #     - dev
+  #     - release/**
+  #     - hotfix/**
 
 env:
   DD_DOCKER_REPO: defectdojo
